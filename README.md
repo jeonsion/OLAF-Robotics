@@ -16,3 +16,9 @@ cmake ..
 make
 sudo make install
 ```
+
+### Permission Setting
+```
+cd /dev
+sudo chmod 777 *
+```

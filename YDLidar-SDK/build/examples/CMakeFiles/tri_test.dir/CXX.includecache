@@ -184,9 +184,9 @@ string
 map
 -
 
-/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/examples/tri_test.cpp
+/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/examples/tri_test.cpp
 CYdLidar.h
-/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/examples/CYdLidar.h
+/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/examples/CYdLidar.h
 iostream
 -
 string

@@ -184,7 +184,7 @@ string
 map
 -
 
-/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/examples/gs_test.cpp
+/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/examples/gs_test.cpp
 iostream
 -
 string
@@ -196,7 +196,7 @@ cctype
 core/base/timer.h
 -
 CYdLidar.h
-/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/examples/CYdLidar.h
+/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/examples/CYdLidar.h
 core/common/ydlidar_help.h
-/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/examples/core/common/ydlidar_help.h
+/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/examples/core/common/ydlidar_help.h
 

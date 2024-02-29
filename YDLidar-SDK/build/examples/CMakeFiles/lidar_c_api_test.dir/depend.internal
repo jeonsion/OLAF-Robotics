@@ -6,4 +6,4 @@ examples/CMakeFiles/lidar_c_api_test.dir/lidar_c_api_test.c.o
  ../core/base/utils.h
  ../core/common/ydlidar_def.h
  ../src/ydlidar_sdk.h
- /home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/examples/lidar_c_api_test.c
+ /home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/examples/lidar_c_api_test.c

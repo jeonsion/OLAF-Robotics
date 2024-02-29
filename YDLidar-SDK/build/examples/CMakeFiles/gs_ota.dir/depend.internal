@@ -16,4 +16,4 @@ examples/CMakeFiles/gs_ota.dir/gs_ota.cpp.o
  ../core/common/ydlidar_help.h
  ../core/common/ydlidar_protocol.h
  ../src/CYdLidar.h
- /home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/examples/gs_ota.cpp
+ /home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/examples/gs_ota.cpp

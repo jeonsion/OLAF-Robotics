@@ -6,5 +6,5 @@ C_FLAGS =   -fPIC -std=c++11
 
 C_DEFINES = 
 
-C_INCLUDES = -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/. -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/core -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/src -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/.. -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/build/examples 
+C_INCLUDES = -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/. -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/core -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/src -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/.. -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/build/examples 
 

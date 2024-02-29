@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++11   -fPIC -std=c++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/. -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/core -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/src -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/.. -I/home/sion-panda/ros_ws/src/Olaf/YDLidar-SDK/build/examples 
+CXX_INCLUDES = -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/. -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/core -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/src -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/.. -I/home/sion-lp/ros_ws/src/Olaf/YDLidar-SDK/build/examples 
 

@@ -318,7 +318,7 @@ int main (int argc, char** argv)
 	nh.getParam("m_bSingle_TF_option", m_bSingle_TF_option);
     	printf("##m_bSingle_TF_option: %d \n", m_bSingle_TF_option);
 
-    	ros::Rate loop_rate(100); //HZ
+    	ros::Rate loop_rate(25); //HZ, 원래 100이었음
     	serial_open();
 
 	SendRecv("za\n", dSend_Data, 10);	// Euler Angle -> '0.0' Reset

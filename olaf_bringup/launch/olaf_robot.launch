@@ -1,0 +1,23 @@
+<launch>
+
+    <!-- IMU -->
+    <include file="$(find iahrs_driver)/launch/iahrs_driver.launch" />
+
+    <!-- LIDAR -->
+    <include file="$(find ydlidar_ros_driver)/launch/lidar.launch" />
+
+    <!-- Motor -->
+    <include file="$(find md)/launch/md_robot_node.launch" />
+
+
+    <!-- TF -->
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser"
+        args="0.0 0.0 0.2 0.0 0.0 0.0 base_link laser_link 40" />
+
+    <!--Map -> base_footprint -->
+    <node pkg="tf" type="static_transform_publisher" name="map_to_base_footprint"
+        args="0 0 0 0 0 0 map base_footprint 40" />
+
+    <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0.09 0 0 0 base_footprint base_link 40" />
+
+</launch>

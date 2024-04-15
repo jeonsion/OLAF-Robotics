@@ -516,7 +516,7 @@ int main(int argc, char** argv)
         if(ros::Time::now().toSec() >= start_delay_sec) {
             break;
         }
-
+    
         ReceiveDataFromController();
 
         ros::spinOnce();
@@ -605,6 +605,8 @@ int main(int argc, char** argv)
         std_msgs::Int32 left_ticks;
         right_ticks.data = pos_right;
         left_ticks.data = pos_left;
+
+        ROS_INFO("Right ticks: %d, Left ticks: %d", right_ticks.data, left_ticks.data);
 
         right_ticks_pub.publish(right_ticks);
         left_ticks_pub.publish(left_ticks);

@@ -20,4 +20,14 @@
 
     <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0.09 0 0 0 base_footprint base_link 40" />
 
+
+    <!-- Initial Pose and Goal Publisher -->
+    <!-- Publish: /initialpose, /move_base_simple/goal -->
+    <node pkg="rviz" type="rviz" name="rviz">
+    </node>
+    <!-- Subscribe: /initialpose, /move_base_simple/goal -->
+    <!-- Publish: /initial_2d, /goal_2d -->
+    <node pkg="localization_data_pub" type="rviz_click_to_2d" name="rviz_click_to_2d">
+    </node>   
+
 </launch>

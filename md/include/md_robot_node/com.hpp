@@ -1,5 +1,5 @@
 #define ID_ALL                      0xfe
-#define MAX_PACKET_SIZE             26
+#define MAX_PACKET_SIZE             128
 #define MAX_DATA_SIZE               21
 #define REQUEST_PNT_MAIN_DATA       2
 #define CMD_ALARM_RESET             8
@@ -25,6 +25,7 @@ typedef enum {
     PID_ROBOT_MONITOR2 = 224,   // req, onlt MDUI
     PID_PNT_IO_MONITOR = 241,   // req, only MDUI
     PID_ROBOT_PARAM = 247,      // set, only MDUI
+    PID_ROBOT_MONITOR = 253,      // set, only MDUI
 } PID_CMD_t;
 
 typedef enum {
@@ -96,7 +97,7 @@ typedef union _MOTOR_STATE_t {
         uint8_t InvVel:1;
         uint8_t Stall:1;
     } bits;
-} MOTOR_STATE_t;
+} __attribute__((aligned(1),packed))MOTOR_STATE_t;
 
 typedef struct {
     int16_t rpm_id1;
@@ -122,7 +123,7 @@ typedef union _PLATFORM_STATE_t {
         uint8_t bReserved1:1;
         uint8_t bReserved2:1;
     } bits;
-} PLATFORM_STATE_t;
+} __attribute__((aligned(1),packed))PLATFORM_STATE_t;
 
 typedef union _PLATFORM_STATE_2_t {
     uint8_t val;
@@ -136,7 +137,7 @@ typedef union _PLATFORM_STATE_2_t {
         uint8_t bReserved1:1;
         uint8_t bReserved2:1;
     } bits;
-} PLATFORM_STATE_2_t;
+} __attribute__((aligned(1),packed))PLATFORM_STATE_2_t;
 
 typedef union _DOCKING_STATE_t {
     uint8_t val;
@@ -150,7 +151,7 @@ typedef union _DOCKING_STATE_t {
         uint8_t bIr3:1;
         uint8_t bRccState:1;
     } bits;
-} DOCKING_STATE_t;
+} __attribute__((aligned(1),packed))DOCKING_STATE_t;
 
 typedef struct {
     uint32_t lTempPosi_x;
@@ -161,8 +162,9 @@ typedef struct {
     uint8_t byUS2;
     uint8_t byUS3;
     uint8_t byUS4;
-    PLATFORM_STATE_t byPlatStatus;
-    uint8_t charger_connection_state;
+    uint8_t byPlatStatus;
+    int16_t linear_velocity;
+    int16_t angular_velocity;
 } __attribute__((aligned(1),packed)) PID_ROBOT_MONITOR_t;
 
 typedef struct {
@@ -187,7 +189,7 @@ typedef union _MOTOR_CTRL_SIGNAL_t {
         uint8_t fgEncoderA:1;
         uint8_t fgEncoderB:1;
     } bits;
-}  MOTOR_CTRL_SIGNAL_t;
+}  __attribute__((aligned(1),packed))MOTOR_CTRL_SIGNAL_t;
 
 typedef struct {
     MOTOR_CTRL_SIGNAL_t motor_1;
@@ -231,8 +233,8 @@ typedef struct {
     int nSlowstart;
     int nSlowdown;
     int motor_pole;
-    int motor_count;
-    double motor_count_per_degree;
+    // int motor_count;
+    // double motor_count_per_degree;
 
     uint16_t sSetDia;
     uint16_t sSetWheelLen;

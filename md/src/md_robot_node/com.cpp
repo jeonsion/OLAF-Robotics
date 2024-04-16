@@ -10,8 +10,8 @@ serial::Serial ser;
 
 PID_PNT_MAIN_DATA_t curr_pid_pnt_main_data;
 PID_ROBOT_MONITOR2_t curr_pid_robot_monitor2;
-PID_PNT_IO_MONITOR_t curr_pid_pnt_io_monitor;
 PID_ROBOT_MONITOR_t curr_pid_robot_monitor;
+PID_PNT_IO_MONITOR_t curr_pid_pnt_io_monitor;
 PID_GAIN_t curr_pid_gain;
 
 uint8_t serial_comm_rcv_buff[MAX_PACKET_SIZE];
@@ -19,8 +19,11 @@ uint8_t serial_comm_snd_buff[MAX_PACKET_SIZE];
 
 extern INIT_SETTING_STATE_t fgInitsetting;
 extern int CalRobotPoseFromRPM(PID_PNT_MAIN_DATA_t *pData);
-extern int CalRobotPoseFromPos(PID_PNT_MAIN_DATA_t *pData);
+extern void MakeMDRobotMessage1(PID_PNT_MAIN_DATA_t *pData);
+extern void MakeMDRobotMessage2(PID_ROBOT_MONITOR_t *pData);
 extern void PubRobotPose(void);
+extern void PubMDRobotMessage2(void);
+extern void PubMDRobotMessage1(void);
 
 //Initialize serial communication in ROS
 int InitSerialComm(void)
@@ -36,8 +39,7 @@ int InitSerialComm(void)
 
     catch (serial::IOException& e)
     {
-        ROS_ERROR_STREAM("Unable to open por Fucking ");
-        
+        ROS_ERROR_STREAM("Unable to open port ");
         return -1;
     }
 
@@ -50,13 +52,13 @@ int InitSerialComm(void)
     }
 }
 
-uint16_t CalCheckSum(uint8_t *pData, uint16_t length)
+uint8_t CalCheckSum(uint8_t *pData, uint16_t length)
 {
-    uint16_t sum;
+    uint8_t sum;
 
     sum = 0;
     for(int i = 0; i < length; i++) {
-        sum += pData[i];
+        sum += *pData++;
     }
 
     sum = ~sum + 1; //check sum
@@ -84,11 +86,12 @@ int PutMdData(PID_CMD_t pid, uint16_t rmid, const uint8_t *pData, uint16_t lengt
 
 #if 0
     {
-        if(fgInitsetting == INIT_SETTING_STATE_NONE) {
-            for(int i = 0; i < len; i++) {
-                ROS_INFO("%2d: 0x%02x, %3d", i, serial_comm_snd_buff[i], serial_comm_snd_buff[i]);
-            }
+        int i;
+
+        for(i = 0; i < len; i++) {
+            printf("%d ", serial_comm_snd_buff[i]);
         }
+        printf("\r\n");
     }
 #endif
 
@@ -137,10 +140,9 @@ int MdReceiveProc(void) //save the identified serial data to defined variable ac
             if(byRcvDataSize == sizeof(PID_PNT_MAIN_DATA_t)) {
                 memcpy((char *)&curr_pid_pnt_main_data, (char *)pRcvData, sizeof(PID_PNT_MAIN_DATA_t));
 
-                // CalRobotPoseFromRPM(&curr_pid_pnt_main_data);
-                CalRobotPoseFromPos(&curr_pid_pnt_main_data);
+                MakeMDRobotMessage1(&curr_pid_pnt_main_data);
 
-                PubRobotPose();
+                PubMDRobotMessage1();
             }
             break;
         }
@@ -184,6 +186,35 @@ int MdReceiveProc(void) //save the identified serial data to defined variable ac
             }
             break;
         }
+
+        case PID_ROBOT_MONITOR:        // 253
+        {
+            if(byRcvDataSize == sizeof(PID_ROBOT_MONITOR_t)) {
+                memcpy((char *)&curr_pid_robot_monitor, (char *)pRcvData, sizeof(PID_ROBOT_MONITOR_t));
+
+#if 0
+                ROS_INFO("%d", curr_pid_robot_monitor.lTempPosi_x);
+                ROS_INFO("%d", curr_pid_robot_monitor.lTempPosi_y);
+                ROS_INFO("%d", curr_pid_robot_monitor.sTempTheta);
+                ROS_INFO("%d", curr_pid_robot_monitor.battery_percent);
+                ROS_INFO("%d", curr_pid_robot_monitor.byUS1);
+                ROS_INFO("%d", curr_pid_robot_monitor.byUS2);
+                ROS_INFO("%d", curr_pid_robot_monitor.byUS3);
+                ROS_INFO("%d", curr_pid_robot_monitor.byUS4);
+                ROS_INFO("0x%x", (uint8_t)curr_pid_robot_monitor.byPlatStatus.val);
+                ROS_INFO("%d", curr_pid_robot_monitor.linear_velocity);
+                ROS_INFO("%d", curr_pid_robot_monitor.angular_velocity);
+                ROS_INFO(" ");
+#endif                
+
+                if(robotParamData.use_MDUI == 1) {  // If using MDUI
+                    MakeMDRobotMessage2(&curr_pid_robot_monitor);
+
+                    PubMDRobotMessage2();
+                }
+            }
+            break;
+        }
     }
     return 1;
 }
@@ -207,14 +238,15 @@ int AnalyzeReceivedData(uint8_t byArray[], uint8_t byBufNum) //Analyze the commu
         rcv_step = 0;
         byPacketNum = 0;
 
+
         return 0;
     }
-
+    
     for(j = 0; j < byBufNum; j++)
     {
         data = byArray[j];
 #if 0
-        ROS_INFO("%2d: %02x, %3d", j, data, data);
+        printf("%02x(%d) ", data, data);
 #endif
         switch(rcv_step) {
             case 0:    //Put the reading machin id after checking the data
@@ -229,6 +261,7 @@ int AnalyzeReceivedData(uint8_t byArray[], uint8_t byBufNum) //Analyze the commu
                 else
                 {
                     byPacketNum = 0;
+                    ROS_INFO("error.ser: %s, %d", __FILE__, __LINE__);
                 }
                 break;
             case 1:    //Put the transmitting machin id after checking the data
@@ -243,7 +276,7 @@ int AnalyzeReceivedData(uint8_t byArray[], uint8_t byBufNum) //Analyze the commu
                 {
                     rcv_step = 0;
                     byPacketNum = 0;
-
+                    ROS_INFO("error.ser: %s, %d", __FILE__, __LINE__);
                 }
                 break;
 
@@ -259,6 +292,7 @@ int AnalyzeReceivedData(uint8_t byArray[], uint8_t byBufNum) //Analyze the commu
                 {
                     rcv_step = 0;
                     byPacketNum = 0;
+                    ROS_INFO("error.ser: %s, %d", __FILE__, __LINE__);
                 }
                 break;
              case 3:    //Put the PID number into the array
@@ -285,6 +319,7 @@ int AnalyzeReceivedData(uint8_t byArray[], uint8_t byBufNum) //Analyze the commu
                 if(++byDataNum >= MAX_DATA_SIZE)
                 {
                     rcv_step = 0;
+                    ROS_INFO("error.ser: %s, %d", __FILE__, __LINE__);
                     break;
                 }
 
@@ -301,6 +336,11 @@ int AnalyzeReceivedData(uint8_t byArray[], uint8_t byBufNum) //Analyze the commu
                 {
                     MdReceiveProc();                                 //save the identified serial data to defined variable
                 }
+                else {
+                    ROS_INFO("error.ser: %s, %d", __FILE__, __LINE__);
+                }
+
+                byPacketNum = 0;
 
                 rcv_step = 0;
                 break;
@@ -318,6 +358,9 @@ int ReceiveDataFromController(void) //Analyze the communication data
     uint8_t byRcvBuf[250];
     uint8_t byBufNumber;
 
+    static uint8_t tempBuffer[250];
+    static uint8_t tempLength;
+
     byBufNumber = ser.available();
     if(byBufNumber != 0)
     {
@@ -326,8 +369,13 @@ int ReceiveDataFromController(void) //Analyze the communication data
         }
 
         ser.read(byRcvBuf, byBufNumber);
-        AnalyzeReceivedData(byRcvBuf, byBufNumber);
+
+        memcpy(tempBuffer, byRcvBuf, byBufNumber);
+        tempLength = byBufNumber;
+
+        AnalyzeReceivedData(tempBuffer, tempLength);
     }
 
     return 1;
 }
+

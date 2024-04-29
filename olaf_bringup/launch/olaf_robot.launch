@@ -16,23 +16,63 @@
 
 
     <!-- TF -->
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser"
-        args="0.0 0.0 0.2 0.0 0.0 0.0 base_link laser_link 40" />
-
-    <!--Map -> base_footprint -->
-    <node pkg="tf" type="static_transform_publisher" name="map_to_base_footprint"
-        args="0 0 0 0 0 0 map base_footprint 40" />
 
     <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0.09 0 0 0 base_footprint base_link 40" />
+
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser"
+        args="0.0 0.0 0.2 0.0 0.0 0.0 base_link laser 30" />
+
+
+
+
 
 
     <!-- Initial Pose and Goal Publisher -->
     <!-- Publish: /initialpose, /move_base_simple/goal -->
     <node pkg="rviz" type="rviz" name="rviz">
     </node>
+
+	<!-- Wheel Odometry Publisher -->
+	<!-- Subscribe: /right_ticks, /left_ticks, /initial_2d -->
+	<!-- Publish: /odom_data_euler, /odom_data_quat -->
+	<node pkg="localization_data_pub" type="ekf_odom_pub" name="ekf_odom_pub">
+	</node>
+
     <!-- Subscribe: /initialpose, /move_base_simple/goal -->
     <!-- Publish: /initial_2d, /goal_2d -->
     <node pkg="localization_data_pub" type="rviz_click_to_2d" name="rviz_click_to_2d">
     </node>   
+
+
+	<!-- Extended Kalman Filter from robot_pose_ekf Node-->
+	<!-- Subscribe: /odom, /imu_data, /vo -->
+	<!-- Publish: /robot_pose_ekf/odom_combined, TF to odom -> base_footprint -->
+	<remap from="odom" to="odom_data_quat" />
+	<remap from="imu_data" to="imu/data" />
+	<node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+	<param name="output_frame" value="odom"/>
+	<param name="base_footprint_frame" value="base_footprint"/>
+	<param name="freq" value="30.0"/>
+	<param name="sensor_timeout" value="1.0"/>
+	<param name="odom_used" value="true"/>
+	<param name="imu_used" value="true"/>
+	<param name="vo_used" value="false"/>
+	<param name="gps_used" value="false"/>
+	<param name="debug" value="false"/>
+	<param name="self_diagnose" value="false"/>
+	</node>
+
+
+  	<!-- Add AMCL example for differential drive robots for Localization -->
+  	<!-- Subscribe: /scan, /tf, /initialpose, /map -->
+  	<!-- Publish: /amcl_pose, /particlecloud, TF to map -> odom-->
+  	<include file="$(find olaf_navigation)/launch/amcl.launch"/>
+    
+	<!-- Move Base Node -->
+	<!-- Subscribe: /move_base_simple_goal, /map, /tf -->
+	<!-- Publish: /cmd_vel -->
+	<include file="$(find olaf_navigation)/launch/move_base.launch"/>
+
+
 
 </launch>

@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "std_msgs/Int16.h"
+#include "std_msgs/Int32.h"
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -43,7 +43,7 @@ initialPoseRecieved = true;
 }
 
 // Calculate the distance the left wheel has traveled since the last cycle
-void Calc_Left(const std_msgs::Int16& leftCount) {
+void Calc_Left(const std_msgs::Int32& leftCount) {
 
 static int lastCountL = 0;
 if(leftCount.data != 0 && lastCountL != 0) {
@@ -62,7 +62,7 @@ lastCountL = leftCount.data;
 }
 
 // Calculate the distance the right wheel has traveled since the last cycle
-void Calc_Right(const std_msgs::Int16& rightCount) {
+void Calc_Right(const std_msgs::Int32& rightCount) {
 
 static int lastCountR = 0;
 if(rightCount.data != 0 && lastCountR != 0) {

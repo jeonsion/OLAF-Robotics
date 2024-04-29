@@ -9,6 +9,11 @@
     <!-- Motor -->
     <include file="$(find md)/launch/md_robot_node.launch" />
 
+    <!-- Run the map server -->
+    <arg name="map_file" default="$(find olaf_navigation)/maps/media_labs.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+
 
     <!-- TF -->
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser"

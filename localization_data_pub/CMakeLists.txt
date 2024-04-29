@@ -215,3 +215,6 @@ LINK_DIRECTORIES(/usr/local/lib)
  
 add_executable(rviz_click_to_2d src/rviz_click_to_2d.cpp)
 target_link_libraries(rviz_click_to_2d ${catkin_LIBRARIES})
+
+add_executable(ekf_odom_pub src/ekf_odom_pub.cpp)
+target_link_libraries(ekf_odom_pub ${catkin_LIBRARIES})

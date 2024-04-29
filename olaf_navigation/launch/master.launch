@@ -1,0 +1,60 @@
+<launch>
+
+  <arg name="use_map_topic" default="true"/>
+  <arg name="scan_topic" default="scan" />
+
+  <!-- Run the map server -->
+ <!-- <arg name="map_file" default="$(find olaf_navigation)/maps/media_labs.yaml"/>
+ <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" /> -->
+
+
+  <!-- Initial Pose and Goal Publisher -->
+  <!-- Publish: /initialpose, /move_base_simple/goal -->
+  <!-- Launch Rviz -->
+  <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d /home/lim/catkin_ws/src/ris_bot/navigation_data_pub/maps/floorplan4.rviz">
+  </node>  -->
+
+  <!-- Subscribe: /initialpose, /move_base_simple/goal -->
+  <!-- Publish: /initial_2d, /goal_2d --> 
+  <!-- Launch rviz_click_to_2d node -->
+  <node pkg="localization_data_pub" type="rviz_click_to_2d" name="rviz_click_to_2d">
+  </node>
+
+
+  <!-- Wheel Odometry Publisher -->
+  <!-- Subscribe: /right_ticks, /left_ticks, /initial_2d -->
+  <!-- Publish: /odom_data_euler, /odom_data_quat -->
+  <node pkg="localization_data" type="ekf_odom_pub" name="ekf_odom_pub">
+  </node>
+
+
+  <!-- Extended Kalman Filter from robot_pose_ekf Node-->
+  <!-- Subscribe: /odom, /imu_data, /vo -->
+  <!-- Publish: /robot_pose_ekf/odom_combined -->
+  <remap from="odom" to="odom_data_quat" />
+  <remap from="imu_data" to="imu/data" />
+  <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+  <param name="output_frame" value="odom"/>
+  <param name="base_footprint_frame" value="base_footprint"/>
+  <param name="freq" value="30.0"/>
+  <param name="sensor_timeout" value="1.0"/>
+  <param name="odom_used" value="true"/>
+  <param name="imu_used" value="true"/>
+  <param name="vo_used" value="false"/>
+  <param name="gps_used" value="false"/>
+  <param name="debug" value="false"/>
+  <param name="self_diagnose" value="false"/>
+  </node>
+
+
+
+  <!--- Run AMCL -->
+  <include file="$(find olaf_navigation)/launch/amcl.launch">
+    <arg name="use_map_topic" value="$(arg use_map_topic)" />
+    <arg name="scan_topic"    value="$(arg scan_topic)" />
+  </include>
+
+  <!--- Run Move Base -->
+ <include file="$(find olaf_navigation)/launch/move_base.launch" />
+
+</launch>

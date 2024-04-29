@@ -10,8 +10,8 @@
     <include file="$(find md)/launch/md_robot_node.launch" />
 
     <!-- Run the map server -->
-    <arg name="map_file" default="$(find olaf_navigation)/maps/media_labs.yaml"/>
-    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+    <!-- <arg name="map_file" default="$(find olaf_navigation)/maps/ubilab.yaml"/> -->
+    <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" /> -->
 
 
 

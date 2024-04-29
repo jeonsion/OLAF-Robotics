@@ -2,10 +2,7 @@
 #include "md_robot_node/global.hpp"
 #include "md_robot_node/main.hpp"
 #include "md_robot_node/com.hpp"
-#include "md/md_robot_msg1.h"
-#include "md/md_robot_msg2.h"
-
-// #define ENABLE_MD_MESSAGE          
+#include "md/Pose.h"
 
 #define VELOCITY_CONSTANT_VALUE         9.5492743       // 이동속도(m/min), v = 바퀴 둘레의 길이 x RPM
                                                         // 이동속도(m/sec), v = (2 x 바퀴 반지름 x (pi / 60) x RPM)
@@ -18,9 +15,50 @@
 
 #define LEFT           	  0      // Swing direction
 #define RIGHT             1
+#define PI 3.1415926535
 
-extern md::md_robot_msg1 md_robot_message1;
-extern md::md_robot_msg2 md_robot_message2;
+static double robot_old_x;
+static double robot_old_y;
+static double robot_old_theta;
+
+extern md::Pose robot_pose;
+////////////////////////////////////////////////////////
+// Bring meesages from main.cpp to use to tick variable
+extern std_msgs::Int32 right_ticks;
+extern std_msgs::Int32 left_ticks;
+////////////////////////////////////////////////////////
+
+void ResetOdom(void)
+{
+    robot_old_x = 0.0;
+    robot_old_y = 0.0;
+    robot_old_theta = 0.0;
+
+    robot_pose.x = 0.0;
+    robot_pose.y = 0.0;
+    robot_pose.theta = 0.0;
+    robot_pose.linear_velocity = 0.0;
+    robot_pose.angular_velocity = 0.0;
+}
+
+// RPM --> m/sec
+double * RPMSpeedToRobotSpeed(int16_t rpm_left, int16_t rpm_right)
+{
+    double v_left;
+    double v_right;
+    double temp;
+    static double robot_speed[2];
+
+    temp = (2.0 * PI * robotParamData.wheel_radius) / 60;
+
+    v_left = temp * (double)rpm_left;
+    v_right = temp * (double)rpm_right;
+
+    robot_speed[0] = (v_right + v_left) / 2;
+    robot_speed[1] = (v_right - v_left) / robotParamData.nWheelLength;
+
+    return robot_speed;
+}
 
 // m/sec --> RPM
 int16_t * RobotSpeedToRPMSpeed(double linear, double angular)
@@ -56,69 +94,328 @@ int16_t * RobotSpeedToRPMSpeed(double linear, double angular)
     return goal_rpm_spped;
 }
 
-void MakeMDRobotMessage1(PID_PNT_MAIN_DATA_t *pData)
+void CalRobotPoseFromRPM(PID_PNT_MAIN_DATA_t *pData)
 {
-    static bool first_cal = false;
+    static long previous_rpm;
     static ros::Time previous_time;
+    static int32_t old_mtr_pos_id1;
+    static int32_t old_mtr_pos_id2;
+
+    double lAvrRPM;
     double interval_time;
+    int16_t rpm_left;
+    int16_t rpm_right;
+    double *pVelocity;
+    double delta_s;
+    double delta_theta;
+    double robot_curr_x;
+    double robot_curr_y;
+    double robot_curr_theta;
 
     ros::Time curr_time = ros::Time::now();
+
+    //----------------------------------------------------------------
+    rpm_left = pData->rpm_id1;
+    if(rpm_left > 0) {
+        rpm_left = rpm_left + (robotParamData.nGearRatio / 2);
+    }
+    else {
+        rpm_left = rpm_left - (robotParamData.nGearRatio / 2);
+    }
+    rpm_left /= robotParamData.nGearRatio;
+
+    //----------------------------------------------------------------
+    rpm_right = pData->rpm_id2;
+    if(rpm_right > 0) {
+        rpm_right = rpm_right + (robotParamData.nGearRatio / 2);
+    }
+    else {
+        rpm_right = rpm_right - (robotParamData.nGearRatio / 2);
+    }
+    rpm_right /= robotParamData.nGearRatio;
+
+#if 0
+    ROS_INFO("\r\n");
+    ROS_INFO("Robot RPM-1: %d : %d", pData->rpm_id1, pData->rpm_id2);
+    ROS_INFO("Robot RPM-2: %d : %d", rpm_left, rpm_right);
+#endif
+
+    //---------------------------------------------------------------------
+    // RPM noise filter
+    //---------------------------------------------------------------------
+    lAvrRPM = (rpm_left + rpm_right) / 2;
+    if(abs(lAvrRPM - previous_rpm) > (robotParamData.nMaxRPM / 2)) {
+        lAvrRPM = previous_rpm;
+    }
+    previous_rpm = lAvrRPM;
+    //---------------------------------------------------------------------
+
+    pVelocity = RPMSpeedToRobotSpeed(rpm_left, rpm_right);
+
+#if 0
+    ROS_INFO("1-Robot v:a: %f : %f", pVelocity[0], pVelocity[1]);
+#endif
 
     interval_time = curr_time.toSec() - previous_time.toSec();
     previous_time = curr_time;
 
-    md_robot_message1.interval_time = interval_time;
-    md_robot_message1.motor1_pos = pData->mtr_pos_id1;
-    md_robot_message1.motor2_pos = pData->mtr_pos_id2;
-    md_robot_message1.motor1_rpm = pData->rpm_id1;
-    md_robot_message1.motor2_rpm = pData->rpm_id2;
+    delta_s = pVelocity[0] * interval_time;
+    delta_theta = pVelocity[1] * interval_time;
 
-    md_robot_message1.motor1_state = pData->mtr_state_id1.val;
-    md_robot_message1.motor2_state = pData->mtr_state_id2.val;
+#if 0
+    ROS_INFO("1-delta %f:%f", delta_s, delta_theta);
+#endif
 
-#ifdef ENABLE_MD_MESSAGE
-    ROS_INFO("interval time1: %f, pos1: %d, pos2: %d, rpm1: %d rpm2: %d\r\n",\
-                interval_time, md_robot_message1.motor1_pos, md_robot_message1.motor2_pos, md_robot_message1.motor1_rpm, md_robot_message1.motor2_rpm);
+    robot_curr_x = robot_old_x + delta_s * cos((long double)(robot_old_theta + (delta_theta / 2.0)));
+    robot_curr_y = robot_old_y + delta_s * sin((long double)(robot_old_theta + (delta_theta / 2.0)));
+    robot_curr_theta = robot_old_theta + delta_theta;
+
+    robot_old_x = robot_curr_x;
+    robot_old_y = robot_curr_y;
+    robot_old_theta = robot_curr_theta;
+
+    robot_pose.x = robot_curr_x;
+    robot_pose.y = robot_curr_y;
+    robot_pose.theta = robot_curr_theta;
+    robot_pose.linear_velocity = pVelocity[0];
+    robot_pose.angular_velocity = pVelocity[1];
+
+#if 0
+    ROS_INFO("1-pos x:y:th  %f:%f:%f\r\n", robot_curr_x, robot_curr_y, robot_curr_theta);
 #endif
 }
 
-// MDUI
-void MakeMDRobotMessage2(PID_ROBOT_MONITOR_t *pData)
+void CalRobotPoseFromPos(PID_PNT_MAIN_DATA_t *pData)
 {
     static bool first_cal = false;
+    static long previous_rpm;
     static ros::Time previous_time;
+    static int32_t old_mtr_pos_id1;
+    static int32_t old_mtr_pos_id2;
+
     double interval_time;
+    double delta_s;
+    double delta_theta;
+    double robot_curr_x;
+    double robot_curr_y;
+    double robot_curr_theta;
+
+    int32_t pos_left;
+    int32_t pos_right;
+    double v_left;
+    double v_right;
+    double vel_left;
+    double vel_right;
+    double linear_vel;
+    double angular_vel;
 
     ros::Time curr_time = ros::Time::now();
+
+    pos_left = pData->mtr_pos_id1;
+    pos_right = pData->mtr_pos_id2;
+
+    if(first_cal == false) {
+        first_cal = true;
+
+        old_mtr_pos_id1 = pos_left;
+        old_mtr_pos_id2 = pos_right;
+
+        robot_pose.x = 0;
+        robot_pose.y = 0;
+        robot_pose.theta = 0;
+        robot_pose.linear_velocity = 0;
+        robot_pose.angular_velocity = 0;
+
+        return;
+    }
+
+#if 0
+    ROS_INFO("\r\n");
+    ROS_INFO("mtr pos: %d : %d", pos_left, pos_right);
+#endif
 
     interval_time = curr_time.toSec() - previous_time.toSec();
     previous_time = curr_time;
 
-    md_robot_message2.interval_time = interval_time;
-    md_robot_message2.x_pos = pData->lTempPosi_x;
-    md_robot_message2.y_pos = pData->lTempPosi_y;
-    md_robot_message2.angule = pData->sTempTheta;
+    v_left = (double)(pos_left - old_mtr_pos_id1); 
+    v_right = (double)(pos_right - old_mtr_pos_id2);
 
-    if(robotParamData.reverse_direction == 0) {
-        md_robot_message2.US_1 = pData->byUS1;
-        md_robot_message2.US_2 = pData->byUS2;
-        md_robot_message2.US_3 = pData->byUS3;
-        md_robot_message2.US_4 = pData->byUS4;
+    v_left = v_left * robotParamData.motor_count_per_degree;
+    v_right = v_right * robotParamData.motor_count_per_degree;
+
+    v_left = (v_left / interval_time) * PI / 180.0;
+    v_right = (v_right / interval_time) * PI / 180.0;
+
+    old_mtr_pos_id1 = pos_left;
+    old_mtr_pos_id2 = pos_right;
+
+    vel_left = v_left * robotParamData.wheel_radius;
+    vel_right = v_right * robotParamData.wheel_radius;
+
+    linear_vel = (vel_right + vel_left) / 2;
+    angular_vel = (vel_right - vel_left) / robotParamData.nWheelLength;
+
+#if 0
+    ROS_INFO("2-Robot vel: %f : %f", vel_left, vel_right);
+#endif
+
+    delta_s = linear_vel * interval_time;
+    delta_theta = angular_vel * interval_time;
+
+#if 0
+    ROS_INFO("2-delta %f:%f", delta_s, delta_theta);
+#endif
+
+    robot_curr_x = robot_old_x + delta_s * cos((long double)(robot_old_theta + (delta_theta / 2.0)));
+    robot_curr_y = robot_old_y + delta_s * sin((long double)(robot_old_theta + (delta_theta / 2.0)));
+    robot_curr_theta = robot_old_theta + delta_theta;
+
+    robot_old_x = robot_curr_x;
+    robot_old_y = robot_curr_y;
+    robot_old_theta = robot_curr_theta;
+
+    robot_pose.x = robot_curr_x;
+    robot_pose.y = robot_curr_y;
+    robot_pose.theta = robot_curr_theta;
+    robot_pose.linear_velocity = linear_vel;
+    robot_pose.angular_velocity = angular_vel;
+
+#if 0
+    ROS_INFO("2-pos x:y:th  %f:%f:%f\r\n\r\n", robot_curr_x, robot_curr_y, robot_curr_theta);
+#endif
+}
+
+void CalRobotPose_old(PID_PNT_MAIN_DATA_t *pData)
+{
+    static long previous_rpm;
+    static ros::Time previous_time;
+
+    double lAvrRPM;
+    double interval_time;
+    int16_t rpm_left;
+    int16_t rpm_right;
+    double *pVelocity;
+    double delta_s;
+    double delta_theta;
+    double robot_curr_x;
+    double robot_curr_y;
+    double robot_curr_theta;
+
+    ros::Time curr_time = ros::Time::now();
+
+    //----------------------------------------------------------------
+    rpm_left = pData->rpm_id1;
+    // if(robotParamData.mtr_1_dir_state == 1) {
+    //     rpm_left *= -1;
+    // }
+
+    if(rpm_left > 0) {
+        rpm_left = rpm_left + (robotParamData.nGearRatio / 2);
     }
     else {
-        md_robot_message2.US_1 = pData->byUS4;
-        md_robot_message2.US_2 = pData->byUS3;
-        md_robot_message2.US_3 = pData->byUS2;
-        md_robot_message2.US_4 = pData->byUS1;
+        rpm_left = rpm_left - (robotParamData.nGearRatio / 2);
     }
+    rpm_left /= robotParamData.nGearRatio;
 
-    md_robot_message2.platform_state = pData->byPlatStatus;
-    md_robot_message2.linear_velocity = pData->linear_velocity;
-    md_robot_message2.angular_velocity = pData->angular_velocity;
+    //----------------------------------------------------------------
+    rpm_right = pData->rpm_id2;
+    // if(robotParamData.mtr_2_dir_state == 1) {
+    //     rpm_right *= -1;
+    // }
 
-#ifdef ENABLE_MD_MESSAGE
-    ROS_INFO("interval time2: %f\r\n", interval_time);
-#endif    
+    if(rpm_right > 0) {
+        rpm_right = rpm_right + (robotParamData.nGearRatio / 2);
+    }
+    else {
+        rpm_right = rpm_right - (robotParamData.nGearRatio / 2);
+    }
+    rpm_right /= robotParamData.nGearRatio;
+
+#if 0
+    ROS_INFO("\r\n");
+    ROS_INFO("Robot RPM-1: %d : %d", pData->rpm_id1, pData->rpm_id2);
+    ROS_INFO("Robot RPM-2: %d : %d", rpm_left, rpm_right);
+#endif
+
+    //---------------------------------------------------------------------
+    // RPM noise filter
+    //---------------------------------------------------------------------
+    lAvrRPM = (rpm_left + rpm_right) / 2;
+    if(abs(lAvrRPM - previous_rpm) > (robotParamData.nMaxRPM / 2)) {
+        lAvrRPM = previous_rpm;
+    }
+    previous_rpm = lAvrRPM;
+    //---------------------------------------------------------------------
+
+    pVelocity = RPMSpeedToRobotSpeed(rpm_left, rpm_right);
+
+#if 0
+    ROS_INFO("Robot v:a: %f : %f", pVelocity[0], pVelocity[1]);
+#endif
+
+    interval_time = curr_time.toSec() - previous_time.toSec();
+    previous_time = curr_time;
+
+    delta_s = pVelocity[0] * interval_time;
+    delta_theta = pVelocity[1] * interval_time;
+
+#if 0
+    ROS_INFO("delta %f:%f", delta_s, delta_theta);
+#endif
+
+    robot_curr_x = robot_old_x + delta_s * cos((long double)(robot_old_theta + (delta_theta / 2.0)));
+    robot_curr_y = robot_old_y + delta_s * sin((long double)(robot_old_theta + (delta_theta / 2.0)));
+    robot_curr_theta = robot_old_theta + delta_theta;
+
+    robot_old_x = robot_curr_x;
+    robot_old_y = robot_curr_y;
+    robot_old_theta = robot_curr_theta;
+
+    robot_pose.x = robot_curr_x;
+    robot_pose.y = robot_curr_y;
+    robot_pose.theta = robot_curr_theta;
+    robot_pose.linear_velocity = pVelocity[0];
+    robot_pose.angular_velocity = pVelocity[1];
+
+#if 0
+    ROS_INFO("pos x:y:th  %f:%f:%f", robot_curr_x, robot_curr_y, robot_curr_theta);
+#endif
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////
+// Calculate Tick Values
+void CalTicks(PID_PNT_MAIN_DATA_t *pData)
+{
+    int32_t ticks_left;
+    int32_t ticks_right;
+
+    int32_t encoder_minimum = -2147483648;
+    int32_t encoder_maximum = 2147483647;
+    
+    //std_msgs::Int32 right_wheel_tick_count;
+    //ros::Publisher rightPub("right_ticks", &right_wheel_tick_count);
+ 
+    //std_msgs::Int32 left_wheel_tick_count;
+    //ros::Publisher leftPub("left_ticks", &left_wheel_tick_count);
+
+    //ros::NodeHandle nh1;
+
+    //nh1.initNode();
+    //nh1.advertise(rightPub);
+    //nh1.advertise(leftPub);
+    ticks_left = pData->mtr_pos_id1;
+    ticks_right = pData->mtr_pos_id2;
+
+    right_ticks.data = ticks_right;
+    left_ticks.data = ticks_left;
+    
+    //rightPub.publish( &ticks_right );
+    //leftPub.publish( &ticks_left );
+    //nh1.spinOnce();
+#if 0
+    ROS_INFO("\r\n");
+    ROS_INFO("mtr ticks: %d : %d", ticks_left, ticks_right);
+#endif
+}
+//////////////////////////////////////////////////////////////////////////////////////

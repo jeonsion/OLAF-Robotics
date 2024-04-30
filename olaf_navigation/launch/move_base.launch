@@ -11,8 +11,10 @@
 
     <rosparam file="$(find olaf_navigation)/params/costmap_common_params.yaml" command="load" ns="global_costmap"/>
     <rosparam file="$(find olaf_navigation)/params/costmap_common_params.yaml" command="load" ns="local_costmap"/>
-    <rosparam file="$(find olaf_navigation)/params/local_costmap_params.yaml" command="load" ns="global_costmap"/>
-    <rosparam file="$(find olaf_navigation)/params/global_costmap_params.yaml" command="load" ns="local_costmap"/>
+
+    <rosparam file="$(find olaf_navigation)/params/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find olaf_navigation)/params/global_costmap_params.yaml" command="load"/>
+    
     <rosparam file="$(find olaf_navigation)/params/dwa_local_planner_params.yaml" command="load"/>
     <rosparam file="$(find olaf_navigation)/params/move_base_params.yaml" command="load" />
 

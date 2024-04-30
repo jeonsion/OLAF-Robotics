@@ -9,9 +9,12 @@
     <!-- Motor -->
     <include file="$(find md)/launch/md_robot_node.launch" />
 
-    <!-- Run the map server -->
-    <!-- <arg name="map_file" default="$(find olaf_navigation)/maps/ubilab.yaml"/> -->
-    <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" /> -->
+    	<!-- Map File -->
+  	<arg name="map_file" default="$(find olaf_navigation)/maps/ubilab.yaml"/>
+	
+  	<!-- Map Server -->
+  	<!-- Publish: /map, /map_metadata -->
+  	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
 
 
 
@@ -21,7 +24,6 @@
 
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser"
         args="0.0 0.0 0.2 0.0 0.0 0.0 base_link laser 30" />
-
 
 
 

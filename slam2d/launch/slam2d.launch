@@ -1,9 +1,0 @@
-<launch>
-  <node pkg="slam2d" name="slam2d" type="slam2d_node" output="screen">
-    <remap from="/multiecho_scan" to="/horizontal_laser_2d"/>
-  </node>
-
-
-
-   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find slam2d)/rviz_cfg/slam2d.rviz"/>
-</launch>

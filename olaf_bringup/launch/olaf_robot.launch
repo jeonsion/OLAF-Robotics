@@ -27,8 +27,7 @@
 
 
 
-    <!-- Initial Pose and Goal Publisher -->
-    <!-- Publish: /initialpose, /move_base_simple/goal -->
+	<!-- RVIZ -->
     <node pkg="rviz" type="rviz" name="rviz">
     </node>
 

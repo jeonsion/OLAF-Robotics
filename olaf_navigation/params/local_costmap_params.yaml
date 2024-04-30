@@ -1,17 +1,18 @@
 local_costmap:
-  global_frame: map   #odom
+  global_frame: odom   #odom
   robot_base_frame: base_footprint
 
-  update_frequency: 10.0
-  publish_frequency: 10.0
+  update_frequency: 3.0
+  publish_frequency: 3.0
   transform_tolerance: 2.0
  
 # Rolling Window Related Parameters  
   rolling_window: true
   resolution: 0.02
-  width: 4.0
-  height: 4.0
+  width: 3.0
+  height: 3.0
+  static_map: false
   
   plugins:
     - {name: obstacle_layer, type: "costmap_2d::VoxelLayer"}
-    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+    - {name: inflation_layer, type: "costmap_2d::InflationLayer"} 

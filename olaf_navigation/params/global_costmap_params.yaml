@@ -3,10 +3,10 @@ global_costmap:
   robot_base_frame: base_footprint
   update_frequency: 10.0
   publish_frequency: 10.0
-  transform_tolerance: 2.0
+  transform_tolerance: 0.5
   static_map: true
   rolling_window: false
-
+  
 
   # Determine whether use costmap`s rolling window version
   # This parameter should set false if static_map parameter is set true
@@ -15,7 +15,9 @@ global_costmap:
 
   # Use layer to definite plugin`s parameter namespace which is used to costamp_2d layer
   # ROS seperate parameters using layer
-  plugins:  
-    - {name: static_layer, type: "costmap_2d::StaticLayer"}
-    - {name: obstacle_layer, type: "costmap_2d::VoxelLayer"}
-    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+
+
+  # plugins:  
+  #   - {name: static_layer, type: "costmap_2d::StaticLayer"}
+  #   - {name: obstacle_layer, type: "costmap_2d::VoxelLayer"}
+  #   - {name: inflation_layer, type: "costmap_2d::InflationLayer"}

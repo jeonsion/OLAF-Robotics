@@ -4,14 +4,17 @@ local_costmap:
 
   update_frequency: 10.0
   publish_frequency: 10.0
-  transform_tolerance: 2.0
+  transform_tolerance: 0.5
  
 # Rolling Window Related Parameters  
   rolling_window: true
   resolution: 0.02
   width: 4.0
   height: 4.0
-  
-  plugins:
-    - {name: obstacle_layer, type: "costmap_2d::VoxelLayer"}
-    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+
+
+
+
+  # plugins:
+  #   - {name: obstacle_layer, type: "costmap_2d::VoxelLayer"}
+  #   - {name: inflation_layer, type: "costmap_2d::InflationLayer"}

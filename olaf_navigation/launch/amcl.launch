@@ -46,11 +46,14 @@
     <param name="odom_alpha3" value="0.8"/>
     <!-- Estimated noise of odometry`s translational momentum when rotating -->
     <param name="odom_alpha4" value="0.2"/>
-        
+
+
+
+
     <!-- Laser Configuraton -->
     <!-- Maximum number of laser beam when update the filter --> 
     <!-- RPLidar A1`s max laser beam is 360, A2 is 16384 -->
-    <param name="laser_max_beams" value="30"/>
+    <param name="laser_max_beams" value="180"/>
     <!-- Sensor model`s z_hit, z_max and z_rand mixture weight -->
     <!-- All of following wieh -->
     <param name="laser_z_hit" value="0.5"/>

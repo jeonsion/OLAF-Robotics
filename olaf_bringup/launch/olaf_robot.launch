@@ -10,7 +10,7 @@
     <include file="$(find md)/launch/md_robot_node.launch" />
 
     	<!-- Map File -->
-  	<arg name="map_file" default="/home/sion-lp/test3.yaml"/>
+  	<arg name="map_file" default="/home/sion-lp/0505.yaml"/>
 	
   	<!-- Map Server -->
   	<!-- Publish: /map, /map_metadata -->
@@ -26,6 +26,12 @@
 	<node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="-0.15 0 0.13 0 0 0 base_link laser 10" />
 
 	<node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0 0 0 0 base_footprint base_link 10" />
+
+	<!-- <node pkg="tf" type="static_transform_publisher" name="odom_broadcaster" args="0 0 0 0 0 0 odom base_footprint 10" /> -->
+
+
+
+
 
 
 

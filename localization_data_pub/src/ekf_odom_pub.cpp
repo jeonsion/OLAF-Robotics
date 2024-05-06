@@ -53,7 +53,7 @@ if (leftTicks > 10000) {
 leftTicks = 0 - (65535 - leftTicks);
 }
 else if (leftTicks < -10000) {
-leftTicks = 65535-leftTicks;
+leftTicks = 65535 -leftTicks;
 }
 else{}
 distanceLeft = leftTicks/TICKS_PER_METER;
@@ -63,7 +63,7 @@ lastCountL = leftCount.data;
 
 // Calculate the distance the right wheel has traveled since the last cycle
 void Calc_Right(const std_msgs::Int32& rightCount) {
-
+    
 static int lastCountR = 0;
 if(rightCount.data != 0 && lastCountR != 0) {
 

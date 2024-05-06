@@ -492,11 +492,13 @@ int main(int argc, char** argv)
     ROS_INFO("Slow start     : %d",             robotParamData.nSlowstart);
     ROS_INFO("Slow down      : %d\r\n",         robotParamData.nSlowdown);
 
+
     if(robotParamData.motor_position_type == 0) {
         robotParamData.motor_count = robotParamData.motor_pole * 3 * robotParamData.nGearRatio;
     }
     else {
-        robotParamData.motor_count = robotParamData.encoder_PPR * 4 * robotParamData.nGearRatio;
+        // robotParamData.motor_count = robotParamData.encoder_PPR * 4 * robotParamData.nGearRatio;
+        robotParamData.motor_count = robotParamData.encoder_PPR * 4;
     }
 
     robotParamData.motor_count_per_degree = (double)(360.0 / (double)robotParamData.motor_count);

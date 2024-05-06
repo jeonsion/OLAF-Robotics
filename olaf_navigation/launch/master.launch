@@ -1,11 +1,14 @@
 <launch>
 
-  <arg name="use_map_topic" default="true"/>
-  <arg name="scan_topic" default="scan" />
+
 
   <!-- Run the map server -->
- <!-- <arg name="map_file" default="$(find olaf_navigation)/maps/media_labs.yaml"/>
- <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" /> -->
+    	<!-- Map File -->
+  	<arg name="map_file" default="/home/sion-lp/0505.yaml"/>
+
+  	<!-- Map Server -->
+  	<!-- Publish: /map, /map_metadata -->
+  	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
 
 
   <!-- Initial Pose and Goal Publisher -->
@@ -24,7 +27,7 @@
   <!-- Wheel Odometry Publisher -->
   <!-- Subscribe: /right_ticks, /left_ticks, /initial_2d -->
   <!-- Publish: /odom_data_euler, /odom_data_quat -->
-  <node pkg="localization_data" type="ekf_odom_pub" name="ekf_odom_pub">
+  <node pkg="localization_data_pub" type="ekf_odom_pub" name="ekf_odom_pub">
   </node>
 
 
@@ -50,8 +53,6 @@
 
   <!--- Run AMCL -->
   <include file="$(find olaf_navigation)/launch/amcl.launch">
-    <arg name="use_map_topic" value="$(arg use_map_topic)" />
-    <arg name="scan_topic"    value="$(arg scan_topic)" />
   </include>
 
   <!--- Run Move Base -->

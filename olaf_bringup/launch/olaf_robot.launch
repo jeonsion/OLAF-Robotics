@@ -17,13 +17,18 @@
 
     <!-- Motor -->
     <include file="$(find md)/launch/md_robot_node.launch" />
-
-    <!-- Map File -->
-  	<arg name="map_file" default="/home/sion-lp/0505.yaml"/>
-
-  	<!-- Map Server -->
+  	
+	
+	
+	<!-- Map Server -->
   	<!-- Publish: /map, /map_metadata -->
+    <!-- Map File -->
+  	<arg name="map_file" default="/home/sion-lp/map_1.yaml"/>
   	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
+
+
+
+
 
     <!-- Subscribe: /initialpose, /move_base_simple/goal -->
     <!-- Publish: /initial_2d, /goal_2d -->

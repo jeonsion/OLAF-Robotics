@@ -9,8 +9,8 @@ local_costmap:
 # Rolling Window Related Parameters  
   rolling_window: true
   resolution: 0.02
-  width: 4.0
-  height: 4.0
+  width: 10.0
+  height: 10.0
 
 
 

@@ -49,11 +49,11 @@ void Calc_Left(const std_msgs::Int32& leftCount) {
     static int lastCountL = 0;
     if(leftCount.data != 0 && lastCountL != 0) {
         int leftTicks = (leftCount.data - lastCountL);
-        if (leftTicks > 10000) {
-            leftTicks = 0 - (65535 - leftTicks);
+        if (leftTicks > 1000000) {
+            leftTicks = 0 - (4294967295 - leftTicks);
         }
-        else if (leftTicks < -10000) {
-            leftTicks = 65535-leftTicks;
+        else if (leftTicks < -1000000) {
+            leftTicks = 4294967295-leftTicks;
         }
         distanceLeft = leftTicks/TICKS_PER_METER;
     }
@@ -66,11 +66,11 @@ void Calc_Right(const std_msgs::Int32& rightCount) {
     static int lastCountR = 0;
     if(rightCount.data != 0 && lastCountR != 0) {
         int rightTicks = rightCount.data - lastCountR;
-        if (rightTicks > 10000) {
-            distanceRight = (0 - (65535 - rightTicks))/TICKS_PER_METER;
+        if (rightTicks > 1000000) {
+            distanceRight = (0 - (4294967295 - rightTicks))/TICKS_PER_METER;
         }
-        else if (rightTicks < -10000) {
-            rightTicks = 65535 - rightTicks;
+        else if (rightTicks < -1000000) {
+            rightTicks = 4294967295 - rightTicks;
         }
         distanceRight = rightTicks/TICKS_PER_METER;
     }
@@ -89,8 +89,8 @@ void publish_quat() {
   quatOdom.header.stamp = odomNew.header.stamp;
   quatOdom.header.frame_id = "odom";
   quatOdom.child_frame_id = "base_footprint";
-  quatOdom.pose.pose.position.x = odomNew.pose.pose.position.x*-50;
-  quatOdom.pose.pose.position.y = odomNew.pose.pose.position.y*-50;
+  quatOdom.pose.pose.position.x = odomNew.pose.pose.position.x*50;
+  quatOdom.pose.pose.position.y = odomNew.pose.pose.position.y*50;
   quatOdom.pose.pose.position.z = odomNew.pose.pose.position.z;
   quatOdom.pose.pose.orientation.x = q.x();
   quatOdom.pose.pose.orientation.y = q.y();

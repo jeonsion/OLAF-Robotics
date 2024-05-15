@@ -1,0 +1,10 @@
+#Define the goal
+string book_name
+string book_storage
+---
+#result definition
+bool arrived
+---
+#feedback
+float64 distance
+

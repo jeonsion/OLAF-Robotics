@@ -3,6 +3,20 @@ import rospy
 import actionlib
 from robot_arm_connection.msg import FindBookAction, FindBookGoal
 
+
+from geometry_msgs.msg import Twist
+import sys, select, os
+if os.name == 'nt':
+  import msvcrt, time
+else:
+  import tty, termios
+
+##### Motor_define #####
+BURGER_MAX_LIN_VEL = 0.3
+BURGER_MAX_ANG_VEL = 1.5
+
+
+##### Robot_arm #####
 client = None
 
 def feedback_cb(feedback):
@@ -22,7 +36,12 @@ def book_client():
     rospy.loginfo(client.get_state())
     return client.get_result()
 
+
+
 if __name__ == '__main__':
+
+
+
     try:
         rospy.init_node('mobility')
         result = book_client()

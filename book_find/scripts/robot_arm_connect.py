@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 import rospy
 import actionlib
-from robot_arm_connection.msg import FindBookAction, FindBookGoal
+from book_find.msg import FindBookAction, FindBookGoal
 
 
 from geometry_msgs.msg import Twist
@@ -39,9 +39,6 @@ def book_client():
 
 
 if __name__ == '__main__':
-
-
-
     try:
         rospy.init_node('mobility')
         result = book_client()

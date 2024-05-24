@@ -104,7 +104,7 @@ def book_client():
     client.send_goal(goal, feedback_cb=feedback_cb)
 
     client.wait_for_result()
-    rospy.loginfo(client.get_state())
+    rospy.loginfo(client.get_state())   
     return client.get_result()
 
 if __name__ == '__main__':

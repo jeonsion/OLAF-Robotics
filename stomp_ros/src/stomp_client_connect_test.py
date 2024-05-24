@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import asyncio
 import websockets
@@ -21,7 +23,7 @@ async def connect():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="STOMP Client")
     parser.add_argument(
-        "--host", default="192.168.0.106", help="Host for WebSocket server (default: 192.168.0.106)"
+        "--host", default="192.168.1.235", help="Host for WebSocket server (default: 192.168.1.235)"
     )
     parser.add_argument(
         "--port", type=int, default=8082, help="Port for WebSocket server (default: 8082)"
@@ -30,3 +32,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     asyncio.get_event_loop().run_until_complete(connect())
+
+

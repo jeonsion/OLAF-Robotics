@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
 import argparse
 import asyncio
+import json
 import websockets
 import stomper
 import rospy
@@ -7,9 +9,9 @@ from geometry_msgs.msg import PointStamped
 
 # 매핑 테이블: 문자 -> 좌표 (x, y)
 click_point_mapping = {
-    "1": (1.0, 2.0),
-    "2": (3.0, 4.0),
-    "3": (5.0, 6.0)
+    "1": (1.8820157051086426, 5.681344985961914),
+    "2": (5.386044502258301, 8.285445213317871),
+    "3": (10.152769088745117, 9.670970916748047)
 }
 
 # ROS 노드 초기화
@@ -31,10 +33,19 @@ async def connect():
             message = await websocket.recv()
             print(f"Received message: {message}")
 
-            # 메시지를 받아와서 좌표로 변환
-            if message in click_point_mapping:
-                x, y = click_point_mapping[message]
-                publish_click_point(x, y)
+            # 메시지를 파싱하여 JSON 내용 추출
+            parsed_message = stomper.unpack_frame(message)
+            body = parsed_message['body']
+            try:
+                data = json.loads(body)
+                location_info = data.get("locationInfo")
+                if location_info in click_point_mapping:
+                    x, y = click_point_mapping[location_info]
+                    publish_click_point(x, y)
+                else:
+                    print(f"Unknown locationInfo: {location_info}")
+            except json.JSONDecodeError as e:
+                print(f"Failed to decode JSON: {e}")
 
 def publish_click_point(x, y):
     # 현재 시간을 기준으로 PointStamped 메시지 생성
@@ -51,7 +62,7 @@ def publish_click_point(x, y):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="STOMP Client")
     parser.add_argument(
-        "--host", default="192.168.0.106", help="Host for WebSocket server (default: 192.168.0.106)"
+        "--host", default="192.168.1.235", help="Host for WebSocket server (default: 192.168.1.235)"
     )
     parser.add_argument(
         "--port", type=int, default=8082, help="Port for WebSocket server (default: 8082)"

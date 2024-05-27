@@ -8,30 +8,36 @@ from geometry_msgs.msg import Twist
 ##### Robot_arm #####
 client = None
 
-Minimum_distance = -79.0
-Maximum_distance = -71.0
-
+Minimum_distance = -34.0
+Maximum_distance = -28.0
 
 def feedback_cb(feedback):
     global pub
 
     twist = Twist()
+    distance = feedback.distance
 
-    if feedback.distance >= Minimum_distance and feedback.distance <= Maximum_distance:
+    if distance >= Minimum_distance and distance <= Maximum_distance:
         twist.linear.x = 0
-    elif feedback.distance < Minimum_distance:
-        linear_vel = feedback.distance * 0.01
+    elif distance < Minimum_distance:
+        linear_vel = distance * 0.01
         linear_vel = max(min(linear_vel, 0.02), -0.02)
         twist.linear.x = linear_vel
-    elif feedback.distance > Maximum_distance:
-        if feedback.distance > 0:
-            linear_vel = feedback.distance * 0.01
+    elif distance > Maximum_distance:
+        if distance > 0:
+            linear_vel = distance * 0.01
         else:
-            linear_vel = feedback.distance * -0.01
+            linear_vel = distance * -0.01
 
         linear_vel = max(min(linear_vel, 0.03), -0.03)
         twist.linear.x = linear_vel
-        
+
+    # New conditions for extreme distances
+    if distance < -100:
+        twist.linear.x = -0.05  # Move forward with fixed speed
+    elif distance > 100:
+        twist.linear.x = 0.05  # Move backward with fixed speed
+
     pub.publish(twist)
 
 def book_client():
@@ -39,7 +45,7 @@ def book_client():
     client = actionlib.SimpleActionClient('book_action', FindBookAction)
     client.wait_for_server()
 
-    goal = FindBookGoal(book_name='book2', book_storage="book_storage1")
+    goal = FindBookGoal(book_name='book1', book_storage="book_storage1")
     client.send_goal(goal, feedback_cb=feedback_cb)
 
     client.wait_for_result()

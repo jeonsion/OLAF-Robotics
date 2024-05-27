@@ -9,13 +9,13 @@ from geometry_msgs.msg import PointStamped
 
 # 매핑 테이블: 문자 -> 좌표 (x, y)
 click_point_mapping = {
-    "1": (1.8820157051086426, 5.681344985961914),
-    "2": (5.386044502258301, 8.285445213317871),
-    "3": (10.152769088745117, 9.670970916748047)
+    "53": (7.581643104553223, 7.222347259521484),
+    "54": (5.386044502258301, 8.285445213317871),
+    "55": (10.152769088745117, 9.670970916748047)
 }
 
 # ROS 노드 초기화
-rospy.init_node('stomp_to_rviz_click_point')
+rospy.init_node('STOMP_ROS')
 pub = rospy.Publisher('/clicked_point', PointStamped, queue_size=10)
 
 async def connect():
@@ -31,6 +31,8 @@ async def connect():
         # Infinite loop to keep the connection alive and receive messages
         while True:
             message = await websocket.recv()
+            print()
+            print("#####################")
             print(f"Received message: {message}")
 
             # 메시지를 파싱하여 JSON 내용 추출
@@ -45,7 +47,7 @@ async def connect():
                 else:
                     print(f"Unknown locationInfo: {location_info}")
             except json.JSONDecodeError as e:
-                print(f"Failed to decode JSON: {e}")
+                print(f"Ready to decode JSON")
 
 def publish_click_point(x, y):
     # 현재 시간을 기준으로 PointStamped 메시지 생성
@@ -56,6 +58,7 @@ def publish_click_point(x, y):
     point_msg.point.y = y
     point_msg.point.z = 0.0
 
+    print(f"Publishing point: {point_msg}")
     # 토픽 발행
     pub.publish(point_msg)
 

@@ -23,7 +23,7 @@
 	<!-- Map Server -->
   	<!-- Publish: /map, /map_metadata -->
     <!-- Map File -->
-  	<arg name="map_file" default="/home/sion-lp/map_1.yaml"/>
+  	<arg name="map_file" default="/home/sion-lp/ros_ws/src/Olaf/maps/map_1.yaml"/>
   	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
 
 

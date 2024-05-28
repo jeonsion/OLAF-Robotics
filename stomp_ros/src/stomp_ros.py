@@ -40,14 +40,22 @@ async def connect():
             body = parsed_message['body']
             try:
                 data = json.loads(body)
-                location_info = data.get("locationInfo")
+                if "startPoint" in data:
+                    start_point = data["startPoint"]
+                    end_point = data["endPoint"]
+                    print(f"User {start_point}에서 User {end_point}로 전달합니다.")
+                else:
+                    user_location = data.get("userLocation")
+                    print(f"User {user_location}이 책을 대여했습니다.")
+
+                location_info = data.get("bookLocation")
                 if location_info in click_point_mapping:
                     x, y = click_point_mapping[location_info]
                     publish_click_point(x, y)
-                else:
-                    print(f"Unknown locationInfo: {location_info}")
+                # else:
+                #     # print(f"Unknown locationInfo: {location_info}")
             except json.JSONDecodeError as e:
-                print(f"Ready to decode JSON")
+                print(f"Prepare to receive message: {body}")
 
 def publish_click_point(x, y):
     # 현재 시간을 기준으로 PointStamped 메시지 생성
@@ -58,7 +66,7 @@ def publish_click_point(x, y):
     point_msg.point.y = y
     point_msg.point.z = 0.0
 
-    print(f"Publishing point: {point_msg}")
+    # print(f"Publishing point: {point_msg}")
     # 토픽 발행
     pub.publish(point_msg)
 

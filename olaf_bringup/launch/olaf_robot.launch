@@ -1,6 +1,6 @@
 <launch>
 
-	<!-- Launch Rviz-->
+	<!-- Launch Rviz -->
 	<node pkg="rviz" type="rviz" name="rviz" args="-d /home/sion-lp/ros_ws/src/Olaf/olaf_navigation/rviz/turtlebot3_navigation.rviz">
 	</node>
 
@@ -18,17 +18,36 @@
     <!-- Motor -->
     <include file="$(find md)/launch/md_robot_node.launch" />
   	
-	
-	
 	<!-- Map Server -->
-  	<!-- Publish: /map, /map_metadata -->
+	<!-- Publish: /map, /map_metadata -->
     <!-- Map File -->
   	<arg name="map_file" default="/home/sion-lp/ros_ws/src/Olaf/maps/map_1.yaml"/>
   	<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
 
-
-
-
+	<!-- Hector SLAM -->
+	<node pkg="hector_slam" type="hector_mapping" name="hector_mapping" output="screen">
+		<param name="pub_map_odom_transform" value="true"/>
+		<param name="map_resolution" value="0.05"/>
+		<param name="map_size" value="4096"/>
+		<param name="map_start_x" value="0.5"/>
+		<param name="map_start_y" value="0.5"/>
+		<param name="map_multi_res_levels" value="2"/>
+		<param name="scan_subscriber_queue_size" value="5"/>
+		<param name="scan_topic" value="/scan"/>
+		<param name="scan_max_range" value="8.0"/>
+		<param name="scan_min_range" value="0.05"/>
+		<param name="update_factor_free" value="0.4"/>
+		<param name="update_factor_occupied" value="0.9"/>
+		<param name="map_update_distance_thresh" value="0.4"/>
+		<param name="map_update_angle_thresh" value="0.06"/>
+		<param name="laser_z_min_value" value="-1.0"/>
+		<param name="laser_z_max_value" value="1.0"/>
+		<param name="laser_z_critical_value" value="0.05"/>
+		<param name="odom_frame" value="odom"/>
+		<param name="base_frame" value="base_link"/>
+		<param name="output_frame" value="map"/>
+		<param name="pub_map_scanmatch_transform" value="true"/>
+	</node>
 
     <!-- Subscribe: /initialpose, /move_base_simple/goal -->
     <!-- Publish: /initial_2d, /goal_2d -->
@@ -59,13 +78,9 @@
 		<param name="self_diagnose" value="false"/>
 	</node>
 
-  	<!-- Add AMCL example for differential drive robots for Localization -->
-  	<!-- Subscribe: /scan, /tf, /initialpose, /map -->
-  	<!-- Publish: /amcl_pose, /particlecloud, TF to map -> odom-->
+  	<!-- AMCL -->
   	<include file="$(find olaf_navigation)/launch/amcl.launch"/>
     
 	<!-- Move Base Node -->
-	<!-- Subscribe: /move_base_simple_goal, /map, /tf -->
-	<!-- Publish: /cmd_vel -->
 	<include file="$(find olaf_navigation)/launch/move_base.launch"/>
 </launch>

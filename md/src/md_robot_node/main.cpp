@@ -409,6 +409,17 @@ void resetAlarmCallBack(const std_msgs::Bool& reset_alarm_msg)
 
 int main(int argc, char** argv)
 {
+
+    std_msgs::Int32 left_ticks_init;
+    std_msgs::Int32 right_ticks_init;
+    left_ticks_init.data = 0;
+    right_ticks_init.data = 0;
+
+    //...
+
+    left_ticks = left_ticks_init;
+    right_ticks = right_ticks_init;
+
     ros::init(argc, argv, "md"); //Node name initialization.
     ros::NodeHandle nh;        //Node handle declaration for communication with ROS system.
 

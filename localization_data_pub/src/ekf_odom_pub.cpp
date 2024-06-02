@@ -84,24 +84,24 @@ void publish_quat() {
   tf2::Quaternion q;
          
   q.setRPY(0, 0, odomNew.pose.pose.orientation.z);
- 
+  
   nav_msgs::Odometry quatOdom;
   quatOdom.header.stamp = odomNew.header.stamp;
   quatOdom.header.frame_id = "odom";
   quatOdom.child_frame_id = "base_footprint";
   quatOdom.pose.pose.position.x = odomNew.pose.pose.position.x*100;
   quatOdom.pose.pose.position.y = odomNew.pose.pose.position.y*100;
-  quatOdom.pose.pose.position.z = odomNew.pose.pose.position.z;
+  quatOdom.pose.pose.position.z = odomNew.pose.pose.position.z*100;
   quatOdom.pose.pose.orientation.x = q.x();
   quatOdom.pose.pose.orientation.y = q.y();
   quatOdom.pose.pose.orientation.z = q.z();
   quatOdom.pose.pose.orientation.w = q.w();
   quatOdom.twist.twist.linear.x = odomNew.twist.twist.linear.x*100;
   quatOdom.twist.twist.linear.y = odomNew.twist.twist.linear.y*100;
-  quatOdom.twist.twist.linear.z = odomNew.twist.twist.linear.z;
-  quatOdom.twist.twist.angular.x = odomNew.twist.twist.angular.x;
-  quatOdom.twist.twist.angular.y = odomNew.twist.twist.angular.y;
-  quatOdom.twist.twist.angular.z = odomNew.twist.twist.angular.z;
+  quatOdom.twist.twist.linear.z = odomNew.twist.twist.linear.z*100;
+  quatOdom.twist.twist.angular.x = odomNew.twist.twist.angular.x*100;
+  quatOdom.twist.twist.angular.y = odomNew.twist.twist.angular.y*100;
+  quatOdom.twist.twist.angular.z = odomNew.twist.twist.angular.z*100;
  
   for(int i = 0; i<36; i++) {
     if(i == 0 || i == 7 || i == 14) {

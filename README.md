@@ -1,4 +1,4 @@
-# Olaf(ongoing)
+# Olaf
 Autonomous Driving Robot
 ---
 

@@ -1,6 +1,5 @@
 # Olaf(ongoing)
-LINC 3.0 시제작품 공모전
-
+Autonomous Driving Robot
 ---
 
 ### Installation
@@ -8,7 +7,7 @@ LINC 3.0 시제작품 공모전
 sudo apt-get install ros-noetic-serial
 ```
 
-### Build LiDAR SDK[]
+### Build LiDAR SDK
 ```
 git clone https://github.com/YDLIDAR/YDLidar-SDK.git
 cd YDLidar-SDK/build

@@ -1,5 +1,4 @@
 # Olaf
-Autonomous Driving Robot
 ---
 
 ### Installation
